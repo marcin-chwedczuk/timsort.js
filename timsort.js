@@ -176,4 +176,78 @@
         return { startIndex: startIndex, endIndex: endIndex, array: array };
     };
 
+    exports.randomIntegerArray = function(n) {
+        var a = [];
+
+        n = n || 100;
+        for (var i = 0; i < n; i += 1) {
+            a.push(Math.floor(1024 * Math.random()));
+        }
+
+        return a;
+    };
+
+    var mergeCollapse = exports.mergeCollapse = function(stack) {
+        // stack : [ ... | A | B | C ]
+        
+        var needsRepeat = true;
+        while (needsRepeat) {
+            needsRepeat = false;
+
+            var sl = stack.length;
+
+            // A > B + C
+            var invariant1 = (sl < 3 || (stack[sl-3].count > stack[sl-2].count + stack[sl-1].count));
+            if (!invariant1) {
+                // todo: marge - merge smaller of A or C with B (ties favor C)
+                
+                needsRepeat = true;
+            }
+
+            sl = stack.length;
+
+            // B > C
+            var invariant2 = (sl < 2 || (stack[sl-2].count > stack[sl-1].count));
+            if (!invariant2) {
+                // todo: merge
+                
+                needsRepeat = true;
+            }
+        }
+    }; 
+
+    exports.timsort = function(array) {
+        var arrayLength = array.length;
+        
+        var DESIRED_MINRUN_SIZE = mergeComputeMinrun(arrayLength);
+        console.log('DESIRED_MINRUN_SIZE = ', DESIRED_MINRUN_SIZE);
+        
+        var runsStack = [];
+
+        var startIndex = 0;
+        while (startIndex < arrayLength) {
+            var count = countRun(array, startIndex);
+
+            // minruns should be in a0 <= a1 <= a2 ... order
+            if (count < 0) {
+                // must reverse minrun
+                count = -count;
+                reverse(array, startIndex, startIndex + count);
+            }
+
+            // expand minrun if necessary
+            if (count < DESIRED_MINRUN_SIZE) {
+                var tmp = expandMinrun(array, startIndex, startIndex + count, DESIRED_MINRUN_SIZE);
+                count = tmp.endIndex - tmp.startIndex;
+            }
+
+            startIndex += count;
+
+            runsStack.push({ startIndex: startIndex, count: count });
+            mergeCollapse(runsStack);
+        }
+
+        return array;
+    };
+
 }(window.timsort = {}));
