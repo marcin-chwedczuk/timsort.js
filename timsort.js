@@ -108,6 +108,27 @@
       return found ? (left-1) : ~left;
     };
 
+    var binarySearchFindFirst = exports.binarySearchFindFirst = function(array, start, end, element) {
+      var left = start;  // inclusive
+      var right = end;  // exclusive
+      var found;
+
+      while (left < right) {
+        var middle = (left + right) >> 1;
+        
+        if (element > array[middle]) {
+          left = middle + 1;
+        } else {
+          right = middle;
+          // We are looking for the lowest index so we can't return immediately.
+          found = (element === array[middle]);
+        }
+      }
+      // left is the index if found, or the insertion point otherwise.
+      // ~left is a shorthand for -left - 1.
+      return found ? left : ~left;
+    };
+
     var testBinarySearch = exports.testBinarySearch = function() {
         var randomArray = [];
         for (var i = 0; i < 50000; i += 1) {
@@ -187,9 +208,109 @@
         return a;
     };
 
-    var mergeCollapse = exports.mergeCollapse = function(stack) {
+    var arrayCopy = exports.arrayCopy = function(source, from, to, dest, destFrom) {
+        for (var i = from; i < to; i += 1) {
+            dest[destFrom++] = source[i];
+        }
+
+        return dest;
+    }
+
+    var mergeLow = exports.mergeLow = function(array, left, right, mergeArea) {
+        var leftEnd = left.startIndex + left.count;
+
+        var R0 = array[right.startIndex], L0 = null;
+
+        // elements in left <= R[0] are already in proper positions
+        var leftStart = binarySearch(
+            array,
+            left.startIndex,
+            leftEnd,
+            R0);
+
+        // i < leftStart -> left::array[i] is in proper positions
+        if (leftStart >= 0) {
+            leftStart += 1;
+        }
+        else {
+            leftStart = -leftStart - 1;
+        }
+
+        var leftCount = leftEnd - leftStart;
+        arrayCopy(array, leftStart, leftEnd, mergeArea, 0);
+
+        var rightStart = right.startIndex;
+        var rightEnd = right.startIndex + right.count;
+        var rightCount = right.count;
+
+        var maStart = 0;
+        var gallopCounter = 0, gallopFailureCounter = 0;
+
+        // perform merge
+        while (leftCount && rightCount) {
+            if (Math.abs(gallopCounter) > MIN_GALLOP) {
+                // galloping mode
+                L0 = mergeArea[maStart];
+
+                // stable sort - be aware of equal elements in galloping mode
+                var index = binarySearchFindFirst(array, rightStart, rightEnd, L0);
+                
+
+                // TODO;
+            }
+            else {
+                // normal mode
+                
+                if (mergeArea[maStart] <= array[rightStart]) {
+                    array[leftStart++] = mergeArea[maStart];
+                    maStart += 1;
+                    leftCount -= 1;
+                    gallopCounter = (gallopCounter > 0 ? gallopCounter+1 : 1);
+                }
+                else {
+                    array[leftStart++] = array[rightStart];
+                    rightStart += 1;
+                    rightCount -= 1;
+                    gallopCounter = (gallopCounter < 0 ? gallopCounter-1 : -1);
+                }
+            }
+        }
+
+        while (leftCount) {
+            array[leftStart++] = mergeArea[maStart++];
+            leftCount -= 1;
+        }
+
+        while (rightCount) {
+            array[leftStart++] = array[rightStart++];
+            rightCount -= 1;
+        }
+
+        return {
+            startIndex: left.startIndex,
+            count: left.count + right.count
+            // , __array__: array
+        };
+    };
+
+    var mergeHigh = exports.mergeHigh = function(array, left, right, mergeArea) {
+    
+    };
+
+    // elements in left run are <= than element in right run
+    var mergeRuns = exports.mergeRuns = function(array, left, right, mergeArea) {
+        if (left.count < right.count) {
+            return mergoLow(array, left, right, mergeArea);
+        }
+        else {
+            return mergeHigh(array, left, right, mergeArea);
+        }
+    };
+
+    var mergeCollapse = exports.mergeCollapse = function(array, stack, mergeArea) {
         // stack : [ ... | A | B | C ]
-        
+        var A, B, C, M;
+
         var needsRepeat = true;
         while (needsRepeat) {
             needsRepeat = false;
@@ -199,7 +320,21 @@
             // A > B + C
             var invariant1 = (sl < 3 || (stack[sl-3].count > stack[sl-2].count + stack[sl-1].count));
             if (!invariant1) {
-                // todo: marge - merge smaller of A or C with B (ties favor C)
+                C = stack.pop();
+                B = stack.pop();
+                A = stack.pop();
+
+                // merge smaller of A or C with B (ties favor C)
+                if (A.count < C.count) {
+                    M = mergeRuns(array, A, B, mergeArea);
+                    stack.push(M);
+                    stack.push(C);
+                }
+                else {
+                    M = mergeRuns(array, B, C, mergeArea);
+                    stack.push(A);
+                    stack.push(M);
+                }
                 
                 needsRepeat = true;
             }
@@ -209,8 +344,13 @@
             // B > C
             var invariant2 = (sl < 2 || (stack[sl-2].count > stack[sl-1].count));
             if (!invariant2) {
-                // todo: merge
-                
+                // merge B and C
+                C = stack.pop();
+                B = stack.pop();
+
+                M = mergeRuns(array, B, C, mergeArea);
+                stack.push(M);
+
                 needsRepeat = true;
             }
         }
@@ -223,6 +363,7 @@
         console.log('DESIRED_MINRUN_SIZE = ', DESIRED_MINRUN_SIZE);
         
         var runsStack = [];
+        var mergeArea = [];
 
         var startIndex = 0;
         while (startIndex < arrayLength) {
@@ -244,7 +385,7 @@
             startIndex += count;
 
             runsStack.push({ startIndex: startIndex, count: count });
-            mergeCollapse(runsStack);
+            mergeCollapse(array, runsStack, mergeArea);
         }
 
         return array;
