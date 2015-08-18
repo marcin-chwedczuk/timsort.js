@@ -230,11 +230,8 @@
         }
 
         while ((start + i) < end) {
-            if (element === array[start + i]) {
-                return (start + i);
-            }
-            else if (element < array[start + i]) {
-                return binarySearchFindFirst(array, start + i - (p >> 1), start + i, element);
+            if (element <= array[start + i]) {
+                return binarySearchFindFirst(array, start + i - (p >> 1), start + i + 1, element);
             }
 
             i += p;
@@ -247,6 +244,65 @@
         else {
             return (-end - 1);
         }
+    };
+
+    var gallopSearchFindLast = exports.gallopSearchFindLast = function(array, start, end, element) {
+        var i = 0, p = 1;
+
+        var last = end - 1;
+
+        if (element > array[last]) {
+            return (-end - 1);
+        }
+
+        while ((last - i) >= start) {
+            if (element >= array[last - i]) {
+                return binarySearch(array, last - i, last - i + (p >> 1) + 1, element);
+            }
+
+            i += p;
+            p *= 2;
+        }
+
+        if (element >= array[start]) {
+            return binarySearch(array, start, last - i + (p >> 1) + 1, element);
+        }
+        else {
+            return (-start - 1);
+        }
+    };
+
+    var getRandomSortedArrayWithRepetitions = function(size) {
+        var a = getRandomSortedArray(size >> 1);
+
+        for (var i = a.length; i < size; i += 1) {
+            a[i] = a[Math.floor(i * Math.random())];
+        }
+
+        a.sort();
+
+        return a;
+    };
+
+    exports.testGallop = function() {
+        var a = getRandomSortedArrayWithRepetitions(25000);
+
+        for (var i = 0; i < 5000; i += 1) {
+            var ri = Math.floor(Math.random() * a.length);
+
+            var firstIndex = a.indexOf(a[ri]);
+            var lastIndex = a.lastIndexOf(a[ri]);
+
+            if (gallopSearchFindLast(a, 0, a.length, a[ri]) != lastIndex) {
+                throw new Error('gallop last failed');
+            }
+
+            if (gallopSearchFindFirst(a, 0, a.length, a[ri]) != firstIndex) {
+                throw new Error('gallop first failed');
+            }
+        }
+
+        console.log('test ok');
     };
 
     var mergeLow = exports.mergeLow = function(array, left, right, mergeArea) {
@@ -294,6 +350,8 @@
                     index = -index - 1;
                 }
  
+                // we don't include element at index
+                // to preserve sort stabilness
                 var count = index - rightStart;
 
                 // copy elements
@@ -317,7 +375,8 @@
 
                 R0 = array[rightStart];
 
-                index = gallopSearchFindFirst(mergeArea, maStart, maStart + leftCount, R0);
+                // in this case we also copy elements equal to R0
+                index = gallopSearchFindLast(mergeArea, maStart, maStart + leftCount, R0);
                 if (index < 0) {
                     index = -index - 1;
                 }
