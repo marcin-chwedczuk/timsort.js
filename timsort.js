@@ -129,14 +129,20 @@
       return found ? left : ~left;
     };
 
-    var testBinarySearch = exports.testBinarySearch = function() {
+    var getRandomSortedArray = function(size) {
         var randomArray = [];
-        for (var i = 0; i < 50000; i += 1) {
+
+        for (var i = 0; i < size; i += 1) {
             randomArray.push(Math.random());
         }
 
         randomArray.sort();
+        return randomArray;
+    };
 
+    var testBinarySearch = exports.testBinarySearch = function() {
+        var randomArray = getRandomSortedArray(50000);
+        
         for (var i = 0; i < 10000; i += 1) {
             var index = Math.floor(Math.random() * randomArray.length);
             var bsIndex = binarySearch(randomArray, 0, randomArray.length, randomArray[index]);
@@ -216,6 +222,33 @@
         return dest;
     }
 
+    var gallopSearchFindFirst = exports.gallopSearchFindFirst = function(array, start, end, element) {
+        var i = 0, p = 1;
+
+        if (element < array[start]) {
+            return (-start - 1);
+        }
+
+        while ((start + i) < end) {
+            if (element === array[start + i]) {
+                return (start + i);
+            }
+            else if (element < array[start + i]) {
+                return binarySearchFindFirst(array, start + i - (p >> 1), start + i, element);
+            }
+
+            i += p;
+            p *= 2;
+        }
+
+        if (element <= array[end - 1]) {
+            return binarySearchFindFirst(array, start + i - (p >> 1), end, element);
+        }
+        else {
+            return (-end - 1);
+        }
+    };
+
     var mergeLow = exports.mergeLow = function(array, left, right, mergeArea) {
         var leftEnd = left.startIndex + left.count;
 
@@ -244,19 +277,64 @@
         var rightCount = right.count;
 
         var maStart = 0;
-        var gallopCounter = 0, gallopFailureCounter = 0;
+        var gallopCounter = 0;
 
         // perform merge
         while (leftCount && rightCount) {
             if (Math.abs(gallopCounter) > MIN_GALLOP) {
                 // galloping mode
+                
+                // -----------------------------------------------------------
+                // Part I: Search L0 in B then copy [B..L0) and L0
+                // if B contains element === L0, we must skip it (sort must be stable)
                 L0 = mergeArea[maStart];
 
-                // stable sort - be aware of equal elements in galloping mode
-                var index = binarySearchFindFirst(array, rightStart, rightEnd, L0);
-                
+                var index = gallopSearchFindFirst(array, rightStart, rightEnd, L0);
+                if (index < 0) {
+                    index = -index - 1;
+                }
+ 
+                var count = index - rightStart;
 
-                // TODO;
+                // copy elements
+                rightCount -= count;
+                gallopCounter = count;
+
+                while (count) {
+                    array[leftStart++] = array[rightStart++];
+                    count -= 1;
+                }
+
+                leftCount -= 1;
+                array[leftStart++] = mergeArea[maStart++];
+
+                // ------------------------------------------------------------
+                // Part II: Search R0 in A then copy [A..R0) and R0
+                
+                if (!rightCount) {
+                    break;
+                }
+
+                R0 = array[rightStart];
+
+                index = gallopSearchFindFirst(mergeArea, maStart, maStart + leftCount, R0);
+                if (index < 0) {
+                    index = -index - 1;
+                }
+
+                count = index - maStart;
+
+                // copy elements 
+                leftCount -= count;
+                gallopCounter = Math.max(count, gallopCounter);
+
+                while (count) {
+                    array[leftStart++] = mergeArea[maStart++];
+                    count -= 1;
+                }
+
+                rightCount -= 1;
+                array[leftStart++] = array[rightStart++];
             }
             else {
                 // normal mode
@@ -291,6 +369,30 @@
             count: left.count + right.count
             // , __array__: array
         };
+    };
+
+    var assertSorted = function(array) {
+        for (var i = 1; i < array.length; i += 1) {
+            if (array[i-1] > array[i]) {
+                throw new Error('array not sorted!');
+            }
+        }
+
+        console.log('OK!');
+    };
+
+    exports.testMergeLo = function() {
+        var left = getRandomSortedArray(13720);
+        var right = getRandomSortedArray(15837);
+
+        var array = left.concat(right);
+
+        console.log('merge start');
+
+        mergeLow(array, { startIndex:0, count:left.length }, { startIndex: left.length, count: right.length }, []);
+
+        console.log('assert start');
+        assertSorted(array);
     };
 
     var mergeHigh = exports.mergeHigh = function(array, left, right, mergeArea) {
@@ -382,10 +484,10 @@
                 count = tmp.endIndex - tmp.startIndex;
             }
 
-            startIndex += count;
-
             runsStack.push({ startIndex: startIndex, count: count });
             mergeCollapse(array, runsStack, mergeArea);
+
+            startIndex += count;
         }
 
         return array;
