@@ -395,8 +395,71 @@
         assertSorted(array);
     };
 
+    // merge left with mergeArea and put to right from top to bottom
     var mergeHigh = exports.mergeHigh = function(array, left, right, mergeArea) {
-    
+        var L_END = array[left.startIndex + left.count - 1];
+
+        var rightStart = right.startIndex;
+        var rightEnd = right.startIndex + right.count;
+
+        var index = binarySearchFindFirst(array, rightStart, rightEnd, L_END);
+        if (index >= 0) {
+            rightEnd = index;
+        }
+        else {
+            rightEnd = -index - 1;
+        }
+
+        arrayCopy(array, rightStart, rightEnd, mergeArea, 0);
+        
+        var rightCount = rightEnd - rightStart;
+        var maLast = rightCount - 1;
+        
+        var leftCount = left.count;
+        var leftLast = left.startIndex + left.count - 1;
+        
+        while (rightCount && leftCount) {
+            if (mergeArea[maLast] >= array[leftLast]) {
+                array[--rightEnd] = mergeArea[maLast];
+                maLast -= 1;
+                rightCount -= 1;
+            }
+            else {
+                array[--rightEnd] = array[leftLast];
+                leftLast -= 1;
+                leftCount -= 1;
+            }
+        }
+
+        while (rightCount) {
+            array[--rightEnd] = mergeArea[maLast--];
+            rightCount -= 1;
+        }
+
+        while (leftCount) {
+            array[--rightEnd] = array[leftLast--];
+            leftCount -= 1;
+        }
+
+        return {
+            startIndex: left.startIndex,
+            count: left.count + right.count
+            , __array__: array
+        };
+    };
+
+    exports.testMergeHi = function() {
+        var left = getRandomSortedArray(23720);
+        var right = getRandomSortedArray(15837);
+
+        var array = left.concat(right);
+
+        console.log('merge start');
+
+        mergeHigh(array, { startIndex:0, count:left.length }, { startIndex: left.length, count: right.length }, []);
+
+        console.log('assert start');
+        assertSorted(array);
     };
 
     // elements in left run are <= than element in right run
