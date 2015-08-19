@@ -486,7 +486,7 @@
         var gallopCounter = 0;
         
         while (rightCount && leftCount) {
-            if (Math.abs(gallopCounter)) {
+            if (Math.abs(gallopCounter) > MIN_GALLOP) {
                 // galloping mode
                 
                 // ----------------------------------------------
