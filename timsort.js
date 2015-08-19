@@ -1,7 +1,7 @@
 (function(exports) {
     'use strict';
 
-    var MIN_GALLOP = 0;
+    var MIN_GALLOP = 8;
 
     var countRun = exports.countRun = function(array, startIndex) {
         var arrayLength = array.length;
