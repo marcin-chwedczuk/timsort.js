@@ -598,7 +598,7 @@
     // elements in left run are <= than element in right run
     var mergeRuns = exports.mergeRuns = function(array, left, right, mergeArea) {
         if (left.count < right.count) {
-            return mergoLow(array, left, right, mergeArea);
+            return mergeLow(array, left, right, mergeArea);
         }
         else {
             return mergeHigh(array, left, right, mergeArea);
@@ -686,7 +686,42 @@
             startIndex += count;
         }
 
+        // collapse stack
+        while (runsStack.length > 1) {
+            var C = runsStack.pop(),
+                B = runsStack.pop();
+
+            var M = mergeRuns(array, B, C, mergeArea);
+            runsStack.push(M);
+        }
+
         return array;
+    };
+
+    exports.testTimsort = function() {
+        var a = [], N = 5500000;
+
+        console.log('generating data...');
+        for (var i = 0; i < N; i += 1) {
+            a.push(Math.random());
+        }
+
+        console.log('timsort');
+        var tmp = [].concat(a);
+        
+        console.time('timsort');
+        exports.timsort(tmp);
+        console.timeEnd('timsort');
+        
+        console.log('check sorted...');
+        assertSorted(tmp);
+
+        console.log('js sort');
+        tmp = [].concat(a);
+       
+        console.time('jsSort');
+        tmp.sort(NUMERIC_COMPARE);
+        console.timeEnd('jsSort');
     };
 
 }(window.timsort = {}));
