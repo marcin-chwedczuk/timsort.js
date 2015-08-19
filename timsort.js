@@ -1,7 +1,7 @@
 (function(exports) {
     'use strict';
 
-    var MIN_GALLOP = 8;
+    var MIN_GALLOP = 0;
 
     var countRun = exports.countRun = function(array, startIndex) {
         var arrayLength = array.length;
@@ -129,14 +129,20 @@
       return found ? left : ~left;
     };
 
-    var getRandomSortedArray = function(size) {
+    var NUMERIC_COMPARE = function(a, b) {
+        return (a - b);
+    };
+
+    var getRandomSortedArray = exports.getRandomSortedArray = function(size) {
         var randomArray = [];
 
         for (var i = 0; i < size; i += 1) {
             randomArray.push(Math.random());
         }
 
-        randomArray.sort();
+        randomArray.sort(NUMERIC_COMPARE);
+        assertSorted(randomArray);
+
         return randomArray;
     };
 
@@ -279,7 +285,7 @@
             a[i] = a[Math.floor(i * Math.random())];
         }
 
-        a.sort();
+        a.sort(NUMERIC_COMPARE);
 
         return a;
     };
@@ -433,7 +439,7 @@
     var assertSorted = function(array) {
         for (var i = 1; i < array.length; i += 1) {
             if (array[i-1] > array[i]) {
-                throw new Error('array not sorted!');
+                throw new Error('array not sorted (for i: ' + i + ')');
             }
         }
 
@@ -457,6 +463,7 @@
     // merge left with mergeArea and put to right from top to bottom
     var mergeHigh = exports.mergeHigh = function(array, left, right, mergeArea) {
         var L_END = array[left.startIndex + left.count - 1];
+        var R_END;
 
         var rightStart = right.startIndex;
         var rightEnd = right.startIndex + right.count;
@@ -476,17 +483,80 @@
         
         var leftCount = left.count;
         var leftLast = left.startIndex + left.count - 1;
+        var gallopCounter = 0;
         
         while (rightCount && leftCount) {
-            if (mergeArea[maLast] >= array[leftLast]) {
-                array[--rightEnd] = mergeArea[maLast];
-                maLast -= 1;
+            if (Math.abs(gallopCounter)) {
+                // galloping mode
+                
+                // ----------------------------------------------
+                // Part I: Search L_END in B then copy (L_END...B] and L_END
+                // if B contains L_END we must include it
+                
+                L_END = array[leftLast];
+
+                var index = gallopSearchFindFirst(
+                    mergeArea, maLast+1-rightCount, maLast+1, L_END);
+
+                // copy [index maLast+1)
+                if (index < 0) {
+                    index = -index - 1;
+                }
+
+                var count = maLast+1 - index;
+
+                rightCount -= count;
+                gallopCounter = count;
+
+                while (count) {
+                    array[--rightEnd] = mergeArea[maLast--];
+                    count -= 1;
+                }
+
+                leftCount -= 1;
+                array[--rightEnd] = array[leftLast--];
+
+                // ----------------------------------------------
+                // Part II: Search R_END in A then copy (R_END .. A)
+                if (!rightCount) {
+                    break;
+                }
+
+                R_END = mergeArea[maLast];
+
+                index = gallopSearchFindLast(
+                    array, leftLast+1-leftCount, leftLast+1, R_END);
+                
+                if (index < 0) {
+                    index = -index - 1;   
+                }
+
+                count = leftLast+1 - index;
+
+                leftCount -= count;
+                gallopCounter = Math.max(count, gallopCounter);
+
+                while (count) {
+                    array[--rightEnd] = array[leftLast--];
+                    count -= 1;
+                }
+
                 rightCount -= 1;
+                array[--rightEnd] = mergeArea[maLast--];
             }
             else {
-                array[--rightEnd] = array[leftLast];
-                leftLast -= 1;
-                leftCount -= 1;
+                if (mergeArea[maLast] >= array[leftLast]) {
+                    array[--rightEnd] = mergeArea[maLast];
+                    maLast -= 1;
+                    rightCount -= 1;
+                    gallopCounter = (gallopCounter > 0 ? gallopCounter+1 : 1);
+                }
+                else {
+                    array[--rightEnd] = array[leftLast];
+                    leftLast -= 1;
+                    leftCount -= 1;
+                    gallopCounter = (gallopCounter < 0 ? gallopCounter-1 : -1);
+                }
             }
         }
 
@@ -519,6 +589,10 @@
 
         console.log('assert start');
         assertSorted(array);
+    };
+
+    exports.mergeHi = function(left, right) {
+        return mergeHigh(left.concat(right), { startIndex:0, count:left.length }, { startIndex:left.length, count:right.length }, []).__array__;
     };
 
     // elements in left run are <= than element in right run
