@@ -129,44 +129,11 @@
       return found ? left : ~left;
     };
 
-    var NUMERIC_COMPARE = function(a, b) {
-        return (a - b);
-    };
-
-    var getRandomSortedArray = exports.getRandomSortedArray = function(size) {
-        var randomArray = [];
-
-        for (var i = 0; i < size; i += 1) {
-            randomArray.push(Math.random());
-        }
-
-        randomArray.sort(NUMERIC_COMPARE);
-        assertSorted(randomArray);
-
-        return randomArray;
-    };
-
-    var testBinarySearch = exports.testBinarySearch = function() {
-        var randomArray = getRandomSortedArray(50000);
-        
-        for (var i = 0; i < 10000; i += 1) {
-            var index = Math.floor(Math.random() * randomArray.length);
-            var bsIndex = binarySearch(randomArray, 0, randomArray.length, randomArray[index]);
-            var expectedIndex = randomArray.lastIndexOf(randomArray[index]);
-
-            if (expectedIndex != bsIndex) {
-                throw new Error('test not passes');
-            }
-        }
-
-        console.log('test OK');
-    };
-
     // minrun is in range [startIndex, endIndex) and should be expanded to minrunSize if possible
     // minrun must be sorted: a0 <= a1 <= a2 ...
     var expandMinrun = exports.expandMinrun = function(array, startIndex, endIndex, desiredMinrunSize) {
         var arrayLength = array.length;
-    
+   
         var minrunSize = endIndex - startIndex;
         
         var elementsToAdd = 
@@ -206,7 +173,7 @@
             endIndex += 1;
         }
 
-        return { startIndex: startIndex, endIndex: endIndex, array: array };
+        return { startIndex: startIndex, endIndex: endIndex };
     };
 
     exports.randomIntegerArray = function(n) {
