@@ -176,17 +176,6 @@
         return { startIndex: startIndex, endIndex: endIndex };
     };
 
-    exports.randomIntegerArray = function(n) {
-        var a = [];
-
-        n = n || 100;
-        for (var i = 0; i < n; i += 1) {
-            a.push(Math.floor(1024 * Math.random()));
-        }
-
-        return a;
-    };
-
     var arrayCopy = exports.arrayCopy = function(source, from, to, dest, destFrom) {
         for (var i = from; i < to; i += 1) {
             dest[destFrom++] = source[i];
@@ -243,39 +232,6 @@
         else {
             return (-start - 1);
         }
-    };
-
-    var getRandomSortedArrayWithRepetitions = function(size) {
-        var a = getRandomSortedArray(size >> 1);
-
-        for (var i = a.length; i < size; i += 1) {
-            a[i] = a[Math.floor(i * Math.random())];
-        }
-
-        a.sort(NUMERIC_COMPARE);
-
-        return a;
-    };
-
-    exports.testGallop = function() {
-        var a = getRandomSortedArrayWithRepetitions(25000);
-
-        for (var i = 0; i < 5000; i += 1) {
-            var ri = Math.floor(Math.random() * a.length);
-
-            var firstIndex = a.indexOf(a[ri]);
-            var lastIndex = a.lastIndexOf(a[ri]);
-
-            if (gallopSearchFindLast(a, 0, a.length, a[ri]) != lastIndex) {
-                throw new Error('gallop last failed');
-            }
-
-            if (gallopSearchFindFirst(a, 0, a.length, a[ri]) != firstIndex) {
-                throw new Error('gallop first failed');
-            }
-        }
-
-        console.log('test ok');
     };
 
     var mergeLow = exports.mergeLow = function(array, left, right, mergeArea) {

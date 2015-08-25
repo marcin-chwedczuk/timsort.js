@@ -180,18 +180,18 @@ describe('timsort', function() {
         it('passes stress test', function() {
             expect(true).toBe(true); // fake expectation
 
-            var sortedArray = testUtils.getRandomSortedArray(50000);
+            var sortedArray = testUtils.getRandomSortedArrayWithRepetitions(50000);
 
             for (var i = 0; i < 1000; i += 1) {
                 var randomIndex = testUtils.getRandomIndex(sortedArray);
              
-                var expectedIndex = array.indexOf(array[randomIndex]);
+                var expectedIndex = sortedArray.lastIndexOf(sortedArray[randomIndex]);
 
                 var bsIndex = timsort.binarySearch(
-                    array, 
+                    sortedArray, 
                     0, 
                     sortedArray.length,
-                    array[randomIndex]);
+                    sortedArray[randomIndex]);
 
                 if (bsIndex !== expectedIndex) {
                     expect(bsIndex).toBe(expectedIndex);
@@ -266,18 +266,18 @@ describe('timsort', function() {
         it('passes stress test', function() {
             expect(true).toBe(true); // fake expectation
 
-            var sortedArray = testUtils.getRandomSortedArray(50000);
+            var sortedArray = testUtils.getRandomSortedArrayWithRepetitions(50000);
 
             for (var i = 0; i < 1000; i += 1) {
                 var randomIndex = testUtils.getRandomIndex(sortedArray);
              
-                var expectedIndex = array.lastIndexOf(array[randomIndex]);
+                var expectedIndex = sortedArray.indexOf(sortedArray[randomIndex]);
 
-                var bsIndex = timsort.binarySearch(
-                    array, 
+                var bsIndex = timsort.binarySearchFindFirst(
+                    sortedArray, 
                     0, 
                     sortedArray.length,
-                    array[randomIndex]);
+                    sortedArray[randomIndex]);
 
                 if (bsIndex !== expectedIndex) {
                     expect(bsIndex).toBe(expectedIndex);
@@ -337,4 +337,193 @@ describe('timsort', function() {
         });
    });
 
-});
+   describe('arrayCopy', function() {
+        it('copies elements from one array to other', function() {
+            var src = [0,0, 1,2,3,4,5, 0,0];
+            var dest = [1,1,1,1,1,1,1,1];
+
+            timsort.arrayCopy(src, 2, 7, dest, 1);
+
+            expect(src).toEqual([0,0, 1,2,3,4,5, 0,0]);
+            expect(dest).toEqual([1, 1,2,3,4,5, 1,1]);
+        });
+   });
+
+   describe('gallopSearchFindLast', function() {
+        var gallopLast = timsort.gallopSearchFindLast;
+
+        it('returns index of last element equal to searched element', function() {
+            var array = [1,2,3,4,5,6,7];
+
+            expect(gallopLast(array, 0, array.length, 3))
+                .toBe(2);
+
+            array = [1,2,3,3,3,4,5];
+
+            expect(gallopLast(array, 0, array.length, 3))
+                .toBe(4);
+
+            expect(gallopLast(array, 0, array.length, 1))
+                .toBe(0);
+
+            expect(gallopLast(array, 0, array.length, 5))
+                .toBe(6);
+
+            expect(gallopLast(array, 0, array.length, 2))
+                .toBe(1);
+
+            expect(gallopLast(array, 0, array.length, 4))
+                .toBe(5);
+        });
+
+        it('returns -index-1 where index is place where element should be inserted ' +
+           'when element is not part of the array', function() {
+        
+            array = [1,2,3,4,5,6,7,8];
+
+            expect(gallopLast(array, 0, array.length, 3.5))
+                .toBe(-3-1);
+
+            expect(gallopLast(array, 0, array.length, 0))
+                .toBe(-0-1);
+
+            expect(gallopLast(array, 0, array.length, 10))
+                .toBe(-array.length-1);
+        });
+
+        it('allows to search subarray', function() {
+            var array = [1,2,/**/3,4,5,6,7,/**/ 8];
+
+            expect(gallopLast(array, 2, 7, 3))
+                .toBe(2);
+
+            expect(gallopLast(array, 2, 7, 7))
+                .toBe(6);
+
+            expect(gallopLast(array, 2, 7, 4))
+                .toBe(3);
+
+            expect(gallopLast(array, 2, 7, 2))
+                .toBe(-2-1);
+
+            expect(gallopLast(array, 2, 7, 10))
+                .toBe(-7-1);
+
+            expect(gallopLast(array, 2, 7, 4.3))
+                .toBe(-4-1);
+        });
+
+        it('passes stress test', function() {
+            expect(true).toBe(true); // fake expectation
+
+            var sortedArray = testUtils.getRandomSortedArrayWithRepetitions(50000);
+
+            for (var i = 0; i < 1000; i += 1) {
+                var randomIndex = testUtils.getRandomIndex(sortedArray);
+             
+                var expectedIndex = sortedArray.lastIndexOf(sortedArray[randomIndex]);
+
+                var bsIndex = gallopLast(
+                    sortedArray, 
+                    0, 
+                    sortedArray.length,
+                    sortedArray[randomIndex]);
+
+                if (bsIndex !== expectedIndex) {
+                    expect(bsIndex).toBe(expectedIndex);
+                    break;
+                }
+            }
+        });
+    });
+
+    describe('gallopSearchFindFirst', function() {
+        var gallopFirst = timsort.gallopSearchFindFirst;
+
+        it('returns index of last element equal to searched element', function() {
+            var array = [1,2,3,4,5,6,7];
+
+            expect(gallopFirst(array, 0, array.length, 3))
+                .toBe(2);
+
+            array = [1,2,3,3,3,4,5];
+
+            expect(gallopFirst(array, 0, array.length, 3))
+                .toBe(2);
+
+            expect(gallopFirst(array, 0, array.length, 1))
+                .toBe(0);
+
+            expect(gallopFirst(array, 0, array.length, 5))
+                .toBe(6);
+
+            expect(gallopFirst(array, 0, array.length, 2))
+                .toBe(1);
+
+            expect(gallopFirst(array, 0, array.length, 4))
+                .toBe(5);
+        });
+
+        it('returns -index-1 where index is place where element should be inserted ' +
+           'when element is not part of the array', function() {
+        
+            array = [1,2,3,4,5,6,7,8];
+
+            expect(gallopFirst(array, 0, array.length, 3.5))
+                .toBe(-3-1);
+
+            expect(gallopFirst(array, 0, array.length, 0))
+                .toBe(-0-1);
+
+            expect(gallopFirst(array, 0, array.length, 10))
+                .toBe(-array.length-1);
+        });
+
+        it('allows to search subarray', function() {
+            var array = [1,2,/**/3,4,5,6,7,/**/ 8];
+
+            expect(gallopFirst(array, 2, 7, 3))
+                .toBe(2);
+
+            expect(gallopFirst(array, 2, 7, 7))
+                .toBe(6);
+
+            expect(gallopFirst(array, 2, 7, 4))
+                .toBe(3);
+
+            expect(gallopFirst(array, 2, 7, 2))
+                .toBe(-2-1);
+
+            expect(gallopFirst(array, 2, 7, 10))
+                .toBe(-7-1);
+
+            expect(gallopFirst(array, 2, 7, 4.3))
+                .toBe(-4-1);
+        });
+  
+        it('passes stress test', function() {
+            expect(true).toBe(true); // fake expectation
+
+            var sortedArray = testUtils.getRandomSortedArrayWithRepetitions(50000);
+
+            for (var i = 0; i < 1000; i += 1) {
+                var randomIndex = testUtils.getRandomIndex(sortedArray);
+             
+                var expectedIndex = sortedArray.indexOf(sortedArray[randomIndex]);
+
+                var bsIndex = gallopFirst(
+                    sortedArray, 
+                    0, 
+                    sortedArray.length,
+                    sortedArray[randomIndex]);
+
+                if (bsIndex !== expectedIndex) {
+                    expect(bsIndex).toBe(expectedIndex);
+                    break;
+                }
+            }
+        });
+   });
+
+
+ });
