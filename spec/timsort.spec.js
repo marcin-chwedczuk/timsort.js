@@ -1,33 +1,34 @@
 
 describe('timsort', function() {
+    var CMP = testUtils.NUMERIC_COMPARE;
 
     describe('countRun', function() {
         it('returns one when start index points to last array element', function() {
-            expect(timsort.countRun([1,2,3], 2))
+            expect(timsort.countRun([1,2,3], CMP, 2))
                 .toBe(1);
         });
 
         it('returns number of elements in non decreasing run', function() {
-            expect(timsort.countRun([5,8,1,2,3,3,4,5,2,1], 2))
+            expect(timsort.countRun([5,8,1,2,3,3,4,5,2,1], CMP, 2))
                 .toBe(6);
         });
 
         it('returns number of elements in decreasing run as negative number', 
            function() {
-               expect(timsort.countRun([4,6,3,2,1,4,5], 2))
+               expect(timsort.countRun([4,6,3,2,1,4,5], CMP, 2))
                 .toBe(-3);
         });
 
         it('accepts startIndex equal zero', function() {
-            expect(timsort.countRun([1,2,3,4,5,3], 0))
+            expect(timsort.countRun([1,2,3,4,5,3], CMP, 0))
                 .toBe(5);
         });
 
         it('allows run to end at array end', function() {
-            expect(timsort.countRun([1,2,3,4,5], 2))
+            expect(timsort.countRun([1,2,3,4,5], CMP, 2))
                 .toBe(3);
 
-            expect(timsort.countRun([5,4,3,2,1], 2))
+            expect(timsort.countRun([5,4,3,2,1], CMP, 2))
                 .toBe(-3);
         });
     });
@@ -119,24 +120,24 @@ describe('timsort', function() {
         it('returns index of last element equal to searched element', function() {
             var array = [1,2,3,4,5,6,7];
 
-            expect(timsort.binarySearch(array, 0, array.length, 3))
+            expect(timsort.binarySearch(array, CMP, 0, array.length, 3))
                 .toBe(2);
 
             array = [1,2,3,3,3,4,5];
 
-            expect(timsort.binarySearch(array, 0, array.length, 3))
+            expect(timsort.binarySearch(array, CMP, 0, array.length, 3))
                 .toBe(4);
 
-            expect(timsort.binarySearch(array, 0, array.length, 1))
+            expect(timsort.binarySearch(array, CMP, 0, array.length, 1))
                 .toBe(0);
 
-            expect(timsort.binarySearch(array, 0, array.length, 5))
+            expect(timsort.binarySearch(array, CMP, 0, array.length, 5))
                 .toBe(6);
 
-            expect(timsort.binarySearch(array, 0, array.length, 2))
+            expect(timsort.binarySearch(array, CMP, 0, array.length, 2))
                 .toBe(1);
 
-            expect(timsort.binarySearch(array, 0, array.length, 4))
+            expect(timsort.binarySearch(array, CMP, 0, array.length, 4))
                 .toBe(5);
         });
 
@@ -145,35 +146,35 @@ describe('timsort', function() {
         
             array = [1,2,3,4,5,6,7,8];
 
-            expect(timsort.binarySearch(array, 0, array.length, 3.5))
+            expect(timsort.binarySearch(array, CMP, 0, array.length, 3.5))
                 .toBe(-3-1);
 
-            expect(timsort.binarySearch(array, 0, array.length, 0))
+            expect(timsort.binarySearch(array, CMP, 0, array.length, 0))
                 .toBe(-0-1);
 
-            expect(timsort.binarySearch(array, 0, array.length, 10))
+            expect(timsort.binarySearch(array, CMP, 0, array.length, 10))
                 .toBe(-array.length-1);
         });
 
         it('allows to search subarray', function() {
             var array = [1,2,/**/3,4,5,6,7,/**/ 8];
 
-            expect(timsort.binarySearch(array, 2, 7, 3))
+            expect(timsort.binarySearch(array, CMP, 2, 7, 3))
                 .toBe(2);
 
-            expect(timsort.binarySearch(array, 2, 7, 7))
+            expect(timsort.binarySearch(array, CMP, 2, 7, 7))
                 .toBe(6);
 
-            expect(timsort.binarySearch(array, 2, 7, 4))
+            expect(timsort.binarySearch(array, CMP, 2, 7, 4))
                 .toBe(3);
 
-            expect(timsort.binarySearch(array, 2, 7, 2))
+            expect(timsort.binarySearch(array, CMP, 2, 7, 2))
                 .toBe(-2-1);
 
-            expect(timsort.binarySearch(array, 2, 7, 10))
+            expect(timsort.binarySearch(array, CMP, 2, 7, 10))
                 .toBe(-7-1);
 
-            expect(timsort.binarySearch(array, 2, 7, 4.3))
+            expect(timsort.binarySearch(array, CMP, 2, 7, 4.3))
                 .toBe(-4-1);
         });
 
@@ -188,7 +189,7 @@ describe('timsort', function() {
                 var expectedIndex = sortedArray.lastIndexOf(sortedArray[randomIndex]);
 
                 var bsIndex = timsort.binarySearch(
-                    sortedArray, 
+                    sortedArray, CMP,
                     0, 
                     sortedArray.length,
                     sortedArray[randomIndex]);
@@ -205,24 +206,24 @@ describe('timsort', function() {
         it('returns index of last element equal to searched element', function() {
             var array = [1,2,3,4,5,6,7];
 
-            expect(timsort.binarySearchFindFirst(array, 0, array.length, 3))
+            expect(timsort.binarySearchFindFirst(array, CMP, 0, array.length, 3))
                 .toBe(2);
 
             array = [1,2,3,3,3,4,5];
 
-            expect(timsort.binarySearchFindFirst(array, 0, array.length, 3))
+            expect(timsort.binarySearchFindFirst(array, CMP, 0, array.length, 3))
                 .toBe(2);
 
-            expect(timsort.binarySearchFindFirst(array, 0, array.length, 1))
+            expect(timsort.binarySearchFindFirst(array, CMP, 0, array.length, 1))
                 .toBe(0);
 
-            expect(timsort.binarySearchFindFirst(array, 0, array.length, 5))
+            expect(timsort.binarySearchFindFirst(array, CMP, 0, array.length, 5))
                 .toBe(6);
 
-            expect(timsort.binarySearchFindFirst(array, 0, array.length, 2))
+            expect(timsort.binarySearchFindFirst(array, CMP, 0, array.length, 2))
                 .toBe(1);
 
-            expect(timsort.binarySearchFindFirst(array, 0, array.length, 4))
+            expect(timsort.binarySearchFindFirst(array, CMP, 0, array.length, 4))
                 .toBe(5);
         });
 
@@ -231,35 +232,35 @@ describe('timsort', function() {
         
             array = [1,2,3,4,5,6,7,8];
 
-            expect(timsort.binarySearchFindFirst(array, 0, array.length, 3.5))
+            expect(timsort.binarySearchFindFirst(array, CMP, 0, array.length, 3.5))
                 .toBe(-3-1);
 
-            expect(timsort.binarySearchFindFirst(array, 0, array.length, 0))
+            expect(timsort.binarySearchFindFirst(array, CMP, 0, array.length, 0))
                 .toBe(-0-1);
 
-            expect(timsort.binarySearchFindFirst(array, 0, array.length, 10))
+            expect(timsort.binarySearchFindFirst(array, CMP, 0, array.length, 10))
                 .toBe(-array.length-1);
         });
 
         it('allows to search subarray', function() {
             var array = [1,2,/**/3,4,5,6,7,/**/ 8];
 
-            expect(timsort.binarySearchFindFirst(array, 2, 7, 3))
+            expect(timsort.binarySearchFindFirst(array, CMP, 2, 7, 3))
                 .toBe(2);
 
-            expect(timsort.binarySearchFindFirst(array, 2, 7, 7))
+            expect(timsort.binarySearchFindFirst(array, CMP, 2, 7, 7))
                 .toBe(6);
 
-            expect(timsort.binarySearchFindFirst(array, 2, 7, 4))
+            expect(timsort.binarySearchFindFirst(array, CMP, 2, 7, 4))
                 .toBe(3);
 
-            expect(timsort.binarySearchFindFirst(array, 2, 7, 2))
+            expect(timsort.binarySearchFindFirst(array, CMP, 2, 7, 2))
                 .toBe(-2-1);
 
-            expect(timsort.binarySearchFindFirst(array, 2, 7, 10))
+            expect(timsort.binarySearchFindFirst(array, CMP, 2, 7, 10))
                 .toBe(-7-1);
 
-            expect(timsort.binarySearchFindFirst(array, 2, 7, 4.3))
+            expect(timsort.binarySearchFindFirst(array, CMP, 2, 7, 4.3))
                 .toBe(-4-1);
         });
   
@@ -274,7 +275,7 @@ describe('timsort', function() {
                 var expectedIndex = sortedArray.indexOf(sortedArray[randomIndex]);
 
                 var bsIndex = timsort.binarySearchFindFirst(
-                    sortedArray, 
+                    sortedArray, CMP,
                     0, 
                     sortedArray.length,
                     sortedArray[randomIndex]);
@@ -291,7 +292,7 @@ describe('timsort', function() {
         it('can expand minrun to desired size', function() {
             var array = [5,4,5,4, 1,2,3,4,7, 1,1,3,5,3, 5,4,5,4];
 
-            timsort.expandMinrun(array, 4, 9, 10);
+            timsort.expandMinrun(array, CMP, 4, 9, 10);
 
             expect(array).toEqual([5,4,5,4, 1,1,1,2,3,3,3,4,5,7, 5,4,5,4]);
         });
@@ -299,7 +300,7 @@ describe('timsort', function() {
         it('can expand minrun of size 1', function() {
             var array = [5,4,5,4, 101, 5,4,5,4];
 
-            timsort.expandMinrun(array, 4, 5, 4);
+            timsort.expandMinrun(array, CMP, 4, 5, 4);
 
             expect(array).toEqual([5,4,5,4, 4,5,5,101, 4]);
         });
@@ -307,7 +308,7 @@ describe('timsort', function() {
         it('stops expansion at array end', function() {
             var array = [5,4,5,4, 1,2,3,4,7, 1,10,4];
 
-            timsort.expandMinrun(array, 4, 9, 10);
+            timsort.expandMinrun(array, CMP, 4, 9, 10);
 
             expect(array).toEqual([5,4,5,4, 1,1,2,3,4,4,7,10]);
         });
@@ -315,7 +316,7 @@ describe('timsort', function() {
         it('can expand minrun with increasing values', function() {
             var array = [0,0, 1,2,3,4, 101,102,103,104, 0,0];
 
-            timsort.expandMinrun(array, 2, 6, 8);
+            timsort.expandMinrun(array, CMP, 2, 6, 8);
 
             expect(array).toEqual([0,0, 1,2,3,4,101,102,103,104, 0,0]);
         });
@@ -323,7 +324,7 @@ describe('timsort', function() {
         it('can expand minrun with decreasing values', function() {
             var array = [0,0, 1,2,3,4,5, 5,4,3,2,1, 0,0];
 
-            timsort.expandMinrun(array, 2, 7, 10);
+            timsort.expandMinrun(array, CMP, 2, 7, 10);
 
             expect(array).toEqual([0,0, 1,1,2,2,3,3,4,4,5,5, 0,0]);
         });
@@ -331,7 +332,7 @@ describe('timsort', function() {
         it('can expand minrun with interleaved values', function() {
             var array = [0,0, 1,2,3,4,5, 0.5,1.5,2.5,3.5,4.5,5.5, 0,0];
 
-            timsort.expandMinrun(array, 2, 7, 11);
+            timsort.expandMinrun(array, CMP, 2, 7, 11);
 
             expect(array).toEqual([0,0, 0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5, 0,0]);
         });
@@ -355,24 +356,24 @@ describe('timsort', function() {
         it('returns index of last element equal to searched element', function() {
             var array = [1,2,3,4,5,6,7];
 
-            expect(gallopLast(array, 0, array.length, 3))
+            expect(gallopLast(array, CMP, 0, array.length, 3))
                 .toBe(2);
 
             array = [1,2,3,3,3,4,5];
 
-            expect(gallopLast(array, 0, array.length, 3))
+            expect(gallopLast(array, CMP, 0, array.length, 3))
                 .toBe(4);
 
-            expect(gallopLast(array, 0, array.length, 1))
+            expect(gallopLast(array, CMP, 0, array.length, 1))
                 .toBe(0);
 
-            expect(gallopLast(array, 0, array.length, 5))
+            expect(gallopLast(array, CMP, 0, array.length, 5))
                 .toBe(6);
 
-            expect(gallopLast(array, 0, array.length, 2))
+            expect(gallopLast(array, CMP, 0, array.length, 2))
                 .toBe(1);
 
-            expect(gallopLast(array, 0, array.length, 4))
+            expect(gallopLast(array, CMP, 0, array.length, 4))
                 .toBe(5);
         });
 
@@ -381,35 +382,35 @@ describe('timsort', function() {
         
             array = [1,2,3,4,5,6,7,8];
 
-            expect(gallopLast(array, 0, array.length, 3.5))
+            expect(gallopLast(array, CMP, 0, array.length, 3.5))
                 .toBe(-3-1);
 
-            expect(gallopLast(array, 0, array.length, 0))
+            expect(gallopLast(array, CMP, 0, array.length, 0))
                 .toBe(-0-1);
 
-            expect(gallopLast(array, 0, array.length, 10))
+            expect(gallopLast(array, CMP, 0, array.length, 10))
                 .toBe(-array.length-1);
         });
 
         it('allows to search subarray', function() {
             var array = [1,2,/**/3,4,5,6,7,/**/ 8];
 
-            expect(gallopLast(array, 2, 7, 3))
+            expect(gallopLast(array, CMP, 2, 7, 3))
                 .toBe(2);
 
-            expect(gallopLast(array, 2, 7, 7))
+            expect(gallopLast(array, CMP, 2, 7, 7))
                 .toBe(6);
 
-            expect(gallopLast(array, 2, 7, 4))
+            expect(gallopLast(array, CMP, 2, 7, 4))
                 .toBe(3);
 
-            expect(gallopLast(array, 2, 7, 2))
+            expect(gallopLast(array, CMP, 2, 7, 2))
                 .toBe(-2-1);
 
-            expect(gallopLast(array, 2, 7, 10))
+            expect(gallopLast(array, CMP, 2, 7, 10))
                 .toBe(-7-1);
 
-            expect(gallopLast(array, 2, 7, 4.3))
+            expect(gallopLast(array, CMP, 2, 7, 4.3))
                 .toBe(-4-1);
         });
 
@@ -424,7 +425,7 @@ describe('timsort', function() {
                 var expectedIndex = sortedArray.lastIndexOf(sortedArray[randomIndex]);
 
                 var bsIndex = gallopLast(
-                    sortedArray, 
+                    sortedArray, CMP,
                     0, 
                     sortedArray.length,
                     sortedArray[randomIndex]);
@@ -443,24 +444,24 @@ describe('timsort', function() {
         it('returns index of last element equal to searched element', function() {
             var array = [1,2,3,4,5,6,7];
 
-            expect(gallopFirst(array, 0, array.length, 3))
+            expect(gallopFirst(array, CMP, 0, array.length, 3))
                 .toBe(2);
 
             array = [1,2,3,3,3,4,5];
 
-            expect(gallopFirst(array, 0, array.length, 3))
+            expect(gallopFirst(array, CMP, 0, array.length, 3))
                 .toBe(2);
 
-            expect(gallopFirst(array, 0, array.length, 1))
+            expect(gallopFirst(array, CMP, 0, array.length, 1))
                 .toBe(0);
 
-            expect(gallopFirst(array, 0, array.length, 5))
+            expect(gallopFirst(array, CMP, 0, array.length, 5))
                 .toBe(6);
 
-            expect(gallopFirst(array, 0, array.length, 2))
+            expect(gallopFirst(array, CMP, 0, array.length, 2))
                 .toBe(1);
 
-            expect(gallopFirst(array, 0, array.length, 4))
+            expect(gallopFirst(array, CMP, 0, array.length, 4))
                 .toBe(5);
         });
 
@@ -469,35 +470,35 @@ describe('timsort', function() {
         
             array = [1,2,3,4,5,6,7,8];
 
-            expect(gallopFirst(array, 0, array.length, 3.5))
+            expect(gallopFirst(array, CMP, 0, array.length, 3.5))
                 .toBe(-3-1);
 
-            expect(gallopFirst(array, 0, array.length, 0))
+            expect(gallopFirst(array, CMP, 0, array.length, 0))
                 .toBe(-0-1);
 
-            expect(gallopFirst(array, 0, array.length, 10))
+            expect(gallopFirst(array, CMP, 0, array.length, 10))
                 .toBe(-array.length-1);
         });
 
         it('allows to search subarray', function() {
             var array = [1,2,/**/3,4,5,6,7,/**/ 8];
 
-            expect(gallopFirst(array, 2, 7, 3))
+            expect(gallopFirst(array, CMP, 2, 7, 3))
                 .toBe(2);
 
-            expect(gallopFirst(array, 2, 7, 7))
+            expect(gallopFirst(array, CMP, 2, 7, 7))
                 .toBe(6);
 
-            expect(gallopFirst(array, 2, 7, 4))
+            expect(gallopFirst(array, CMP, 2, 7, 4))
                 .toBe(3);
 
-            expect(gallopFirst(array, 2, 7, 2))
+            expect(gallopFirst(array, CMP, 2, 7, 2))
                 .toBe(-2-1);
 
-            expect(gallopFirst(array, 2, 7, 10))
+            expect(gallopFirst(array, CMP, 2, 7, 10))
                 .toBe(-7-1);
 
-            expect(gallopFirst(array, 2, 7, 4.3))
+            expect(gallopFirst(array, CMP, 2, 7, 4.3))
                 .toBe(-4-1);
         });
   
@@ -512,7 +513,7 @@ describe('timsort', function() {
                 var expectedIndex = sortedArray.indexOf(sortedArray[randomIndex]);
 
                 var bsIndex = gallopFirst(
-                    sortedArray, 
+                    sortedArray, CMP,
                     0, 
                     sortedArray.length,
                     sortedArray[randomIndex]);
@@ -531,7 +532,7 @@ describe('timsort', function() {
             var mergeArea = [];
 
             timsort.mergeLow(
-                array,
+                array, CMP,
                 { startIndex:2, count:3 },
                 { startIndex:5, count:4 },
                 mergeArea);
@@ -544,7 +545,7 @@ describe('timsort', function() {
             var mergeArea = [];
 
             timsort.mergeLow(
-                array,
+                array, CMP,
                 { startIndex:1, count:7 },
                 { startIndex:8, count:2 },
                 mergeArea);
@@ -557,7 +558,7 @@ describe('timsort', function() {
             var mergeArea = [];
 
             timsort.mergeLow(
-                array,
+                array, CMP,
                 { startIndex:1, count:1 },
                 { startIndex:2, count:6 },
                 mergeArea);
@@ -573,7 +574,7 @@ describe('timsort', function() {
             var mergeArea = [];
 
             timsort.mergeLow(
-                array,
+                array, CMP,
                 { startIndex:0, count:first.length },
                 { startIndex:first.length, count:second.length },
                 mergeArea);
@@ -588,7 +589,7 @@ describe('timsort', function() {
             var mergeArea = [];
 
             timsort.mergeHigh(
-                array,
+                array, CMP,
                 { startIndex:2, count:3 },
                 { startIndex:5, count:4 },
                 mergeArea);
@@ -601,7 +602,7 @@ describe('timsort', function() {
             var mergeArea = [];
 
             timsort.mergeHigh(
-                array,
+                array, CMP,
                 { startIndex:1, count:7 },
                 { startIndex:8, count:2 },
                 mergeArea);
@@ -614,7 +615,7 @@ describe('timsort', function() {
             var mergeArea = [];
 
             timsort.mergeHigh(
-                array,
+                array, CMP,
                 { startIndex:1, count:1 },
                 { startIndex:2, count:6 },
                 mergeArea);
@@ -630,7 +631,7 @@ describe('timsort', function() {
             var mergeArea = [];
 
             timsort.mergeHigh(
-                array,
+                array, CMP,
                 { startIndex:0, count:first.length },
                 { startIndex:first.length, count:second.length },
                 mergeArea);
@@ -698,6 +699,46 @@ describe('timsort', function() {
             sortedBigArray.sort(testUtils.NUMERIC_COMPARE);
 
             expect(tsort(bigArray)).toEqual(sortedBigArray);
+        });
+
+        it('can accept custom compare function', function() {
+            var array = testUtils.getRandomArray(10000)
+                .map(function(element) {
+                    return { value: element };
+                });
+
+            var sortedArray = [].concat(array);
+            sortedArray.sort(function(l,r) {
+                return (l.value - r.value);
+            });
+
+            expect(tsort(array, function(l,r) { return (l.value - r.value); }))
+                .toEqual(sortedArray);
+        });
+
+        it('performs stable sort', function() {
+            //for (var i = 0; i < 100; i += 1) {
+             var array = testUtils.getRandomSortedArrayWithRepetitions(50)
+                .map(function(element, index) {
+                    return { value: element, index: index };
+                });
+
+            var sortedArray = [].concat(array);
+            sortedArray.sort(function(l,r) {
+                var result = (l.value - r.value);
+
+                // force stable sort - js sort doesn't necessary perform stable sorting
+                if (result !== 0) {
+                    return result;
+                }
+                else {
+                    return (l.index - r.index);
+                }
+            });
+
+            expect(tsort(array, function(l,r) { return (l.value - r.value); }))
+                .toEqual(sortedArray);
+            //}
         });
     });
 });

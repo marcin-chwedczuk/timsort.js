@@ -3,7 +3,7 @@
 
     var MIN_GALLOP = 8;
 
-    var countRun = exports.countRun = function(array, startIndex) {
+    var countRun = exports.countRun = function(array, cmp, startIndex) {
         var arrayLength = array.length;
 
         // if last index return 1 as run length
@@ -15,11 +15,11 @@
         var secondElement = array[startIndex + 1];
         var i;
 
-        if (firstElement <= secondElement) {
+        if (cmp(firstElement, secondElement) <= 0) {
             // non decreasing run a0 <= a1 <= a2 <= ...
             
             for (i = startIndex + 2; i < arrayLength; i += 1) {
-               if (array[i-1] > array[i]) {
+               if (cmp(array[i-1], array[i]) > 0) {
                     break;
                }
             }
@@ -31,7 +31,7 @@
             // decreasing run a0 > a1 > a2 > ...
             
             for (i = startIndex + 2; i < arrayLength; i += 1) {
-                if (array[i-1] <= array[i]) {
+                if (cmp(array[i-1], array[i]) <= 0) {
                     break;
                 }
             }
@@ -84,7 +84,7 @@
     //
     // array must be sorted: a0 <= a1 <= a2 ...
     // search in array segment [start...end)
-    var binarySearch = exports.binarySearch = function(array, start, end, element) {
+    var binarySearch = exports.binarySearch = function(array, cmp, start, end, element) {
       var left = start;  // inclusive
       var right = end;  // exclusive
       var found = false;
@@ -92,11 +92,12 @@
       while (left < right) {
         var middle = (left + right) >> 1;
         
-        if (element >= array[middle]) {
+        var cmpResult = cmp(element, array[middle]);
+        if (cmpResult >= 0) {
             left = middle + 1;
             
             if (!found) {
-                found = (element === array[middle]);
+                found = (cmpResult === 0);
             }
         }
         else {
@@ -108,7 +109,7 @@
       return found ? (left-1) : ~left;
     };
 
-    var binarySearchFindFirst = exports.binarySearchFindFirst = function(array, start, end, element) {
+    var binarySearchFindFirst = exports.binarySearchFindFirst = function(array, cmp, start, end, element) {
       var left = start;  // inclusive
       var right = end;  // exclusive
       var found;
@@ -116,12 +117,14 @@
       while (left < right) {
         var middle = (left + right) >> 1;
         
-        if (element > array[middle]) {
+        var cmpResult = cmp(element, array[middle]);
+        if (cmpResult > 0) {
           left = middle + 1;
-        } else {
+        } 
+        else {
           right = middle;
           // We are looking for the lowest index so we can't return immediately.
-          found = (element === array[middle]);
+          found = (cmpResult === 0);
         }
       }
       // left is the index if found, or the insertion point otherwise.
@@ -131,7 +134,7 @@
 
     // minrun is in range [startIndex, endIndex) and should be expanded to minrunSize if possible
     // minrun must be sorted: a0 <= a1 <= a2 ...
-    var expandMinrun = exports.expandMinrun = function(array, startIndex, endIndex, desiredMinrunSize) {
+    var expandMinrun = exports.expandMinrun = function(array, cmp, startIndex, endIndex, desiredMinrunSize) {
         var arrayLength = array.length;
    
         var minrunSize = endIndex - startIndex;
@@ -143,7 +146,7 @@
         // perform binary stable insertion sort to expand minrun
             
         for (var i = 0; i < elementsToAdd; i += 1) {
-            var insertAt = binarySearch(array, startIndex, endIndex, array[endIndex]);
+            var insertAt = binarySearch(array, cmp, startIndex, endIndex, array[endIndex]);
             
             var currentIndex = endIndex, 
                 element = array[endIndex];
@@ -184,64 +187,64 @@
         return dest;
     }
 
-    var gallopSearchFindFirst = exports.gallopSearchFindFirst = function(array, start, end, element) {
+    var gallopSearchFindFirst = exports.gallopSearchFindFirst = function(array, cmp, start, end, element) {
         var i = 0, p = 1;
 
-        if (element < array[start]) {
+        if (cmp(element, array[start]) < 0) {
             return (-start - 1);
         }
 
         while ((start + i) < end) {
-            if (element <= array[start + i]) {
-                return binarySearchFindFirst(array, start + i - (p >> 1), start + i + 1, element);
+            if (cmp(element, array[start + i]) <= 0) {
+                return binarySearchFindFirst(array, cmp, start + i - (p >> 1), start + i + 1, element);
             }
 
             i += p;
             p *= 2;
         }
 
-        if (element <= array[end - 1]) {
-            return binarySearchFindFirst(array, start + i - (p >> 1), end, element);
+        if (cmp(element, array[end - 1]) <= 0) {
+            return binarySearchFindFirst(array, cmp, start + i - (p >> 1), end, element);
         }
         else {
             return (-end - 1);
         }
     };
 
-    var gallopSearchFindLast = exports.gallopSearchFindLast = function(array, start, end, element) {
+    var gallopSearchFindLast = exports.gallopSearchFindLast = function(array, cmp, start, end, element) {
         var i = 0, p = 1;
 
         var last = end - 1;
 
-        if (element > array[last]) {
+        if (cmp(element, array[last]) > 0) {
             return (-end - 1);
         }
 
         while ((last - i) >= start) {
-            if (element >= array[last - i]) {
-                return binarySearch(array, last - i, last - i + (p >> 1) + 1, element);
+            if (cmp(element, array[last - i]) >= 0) {
+                return binarySearch(array, cmp, last - i, last - i + (p >> 1) + 1, element);
             }
 
             i += p;
             p *= 2;
         }
 
-        if (element >= array[start]) {
-            return binarySearch(array, start, last - i + (p >> 1) + 1, element);
+        if (cmp(element, array[start]) >= 0) {
+            return binarySearch(array, cmp, start, last - i + (p >> 1) + 1, element);
         }
         else {
             return (-start - 1);
         }
     };
 
-    var mergeLow = exports.mergeLow = function(array, left, right, mergeArea) {
+    var mergeLow = exports.mergeLow = function(array, cmp, left, right, mergeArea) {
         var leftEnd = left.startIndex + left.count;
 
         var R0 = array[right.startIndex], L0 = null;
 
         // elements in left <= R[0] are already in proper positions
         var leftStart = binarySearch(
-            array,
+            array, cmp,
             left.startIndex,
             leftEnd,
             R0);
@@ -274,7 +277,7 @@
                 // if B contains element === L0, we must skip it (sort must be stable)
                 L0 = mergeArea[maStart];
 
-                var index = gallopSearchFindFirst(array, rightStart, rightEnd, L0);
+                var index = gallopSearchFindFirst(array, cmp, rightStart, rightEnd, L0);
                 if (index < 0) {
                     index = -index - 1;
                 }
@@ -305,7 +308,7 @@
                 R0 = array[rightStart];
 
                 // in this case we also copy elements equal to R0
-                index = gallopSearchFindLast(mergeArea, maStart, maStart + leftCount, R0);
+                index = gallopSearchFindLast(mergeArea, cmp, maStart, maStart + leftCount, R0);
                 if (index < 0) {
                     index = -index - 1;
                 }
@@ -327,7 +330,7 @@
             else {
                 // normal mode
                 
-                if (mergeArea[maStart] <= array[rightStart]) {
+                if (cmp(mergeArea[maStart], array[rightStart]) <= 0) {
                     array[leftStart++] = mergeArea[maStart];
                     maStart += 1;
                     leftCount -= 1;
@@ -359,14 +362,14 @@
     };
 
     // merge left with mergeArea and put to right from top to bottom
-    var mergeHigh = exports.mergeHigh = function(array, left, right, mergeArea) {
+    var mergeHigh = exports.mergeHigh = function(array, cmp, left, right, mergeArea) {
         var L_END = array[left.startIndex + left.count - 1];
         var R_END;
 
         var rightStart = right.startIndex;
         var rightEnd = right.startIndex + right.count;
 
-        var index = binarySearchFindFirst(array, rightStart, rightEnd, L_END);
+        var index = binarySearchFindFirst(array, cmp, rightStart, rightEnd, L_END);
         if (index >= 0) {
             rightEnd = index;
         }
@@ -394,7 +397,7 @@
                 L_END = array[leftLast];
 
                 var index = gallopSearchFindFirst(
-                    mergeArea, maLast+1-rightCount, maLast+1, L_END);
+                    mergeArea, cmp, maLast+1-rightCount, maLast+1, L_END);
 
                 // copy [index maLast+1)
                 if (index < 0) {
@@ -423,7 +426,7 @@
                 R_END = mergeArea[maLast];
 
                 index = gallopSearchFindLast(
-                    array, leftLast+1-leftCount, leftLast+1, R_END);
+                    array, cmp, leftLast+1-leftCount, leftLast+1, R_END);
                 
                 if (index < 0) {
                     index = -index - 1;   
@@ -443,7 +446,7 @@
                 array[--rightEnd] = mergeArea[maLast--];
             }
             else {
-                if (mergeArea[maLast] >= array[leftLast]) {
+                if (cmp(mergeArea[maLast], array[leftLast]) >= 0) {
                     array[--rightEnd] = mergeArea[maLast];
                     maLast -= 1;
                     rightCount -= 1;
@@ -471,21 +474,20 @@
         return {
             startIndex: left.startIndex,
             count: left.count + right.count
-            , __array__: array
         };
     };
 
     // elements in left run are <= than element in right run
-    var mergeRuns = exports.mergeRuns = function(array, left, right, mergeArea) {
+    var mergeRuns = exports.mergeRuns = function(array, cmp, left, right, mergeArea) {
         if (left.count < right.count) {
-            return mergeLow(array, left, right, mergeArea);
+            return mergeLow(array, cmp, left, right, mergeArea);
         }
         else {
-            return mergeHigh(array, left, right, mergeArea);
+            return mergeHigh(array, cmp, left, right, mergeArea);
         }
     };
 
-    var mergeCollapse = exports.mergeCollapse = function(array, stack, mergeArea) {
+    var mergeCollapse = exports.mergeCollapse = function(array, cmp, stack, mergeArea) {
         // stack : [ ... | A | B | C ]
         var A, B, C, M;
 
@@ -504,12 +506,12 @@
 
                 // merge smaller of A or C with B (ties favor C)
                 if (A.count < C.count) {
-                    M = mergeRuns(array, A, B, mergeArea);
+                    M = mergeRuns(array, cmp, A, B, mergeArea);
                     stack.push(M);
                     stack.push(C);
                 }
                 else {
-                    M = mergeRuns(array, B, C, mergeArea);
+                    M = mergeRuns(array, cmp, B, C, mergeArea);
                     stack.push(A);
                     stack.push(M);
                 }
@@ -526,7 +528,7 @@
                 C = stack.pop();
                 B = stack.pop();
 
-                M = mergeRuns(array, B, C, mergeArea);
+                M = mergeRuns(array, cmp, B, C, mergeArea);
                 stack.push(M);
 
                 needsRepeat = true;
@@ -534,7 +536,21 @@
         }
     }; 
 
-    exports.timsort = function(array) {
+    var DEFAULT_COMPARE = function(a, b) {
+        if (a < b) {
+            return -1;
+        }
+        else if (a === b) {
+            return 0;
+        }
+        else {
+            return 1;
+        }
+    };
+
+    exports.timsort = function(array, cmp) {
+        cmp = cmp || DEFAULT_COMPARE;
+
         var arrayLength = array.length;
         
         var DESIRED_MINRUN_SIZE = mergeComputeMinrun(arrayLength);
@@ -544,7 +560,7 @@
 
         var startIndex = 0;
         while (startIndex < arrayLength) {
-            var count = countRun(array, startIndex);
+            var count = countRun(array, cmp, startIndex);
 
             // minruns should be in a0 <= a1 <= a2 ... order
             if (count < 0) {
@@ -555,12 +571,12 @@
 
             // expand minrun if necessary
             if (count < DESIRED_MINRUN_SIZE) {
-                var tmp = expandMinrun(array, startIndex, startIndex + count, DESIRED_MINRUN_SIZE);
+                var tmp = expandMinrun(array, cmp, startIndex, startIndex + count, DESIRED_MINRUN_SIZE);
                 count = tmp.endIndex - tmp.startIndex;
             }
 
             runsStack.push({ startIndex: startIndex, count: count });
-            mergeCollapse(array, runsStack, mergeArea);
+            mergeCollapse(array, cmp, runsStack, mergeArea);
 
             startIndex += count;
         }
@@ -570,7 +586,7 @@
             var C = runsStack.pop(),
                 B = runsStack.pop();
 
-            var M = mergeRuns(array, B, C, mergeArea);
+            var M = mergeRuns(array, cmp, B, C, mergeArea);
             runsStack.push(M);
         }
 
