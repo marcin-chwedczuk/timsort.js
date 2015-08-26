@@ -355,32 +355,7 @@
         return {
             startIndex: left.startIndex,
             count: left.count + right.count
-            // , __array__: array
         };
-    };
-
-    var assertSorted = function(array) {
-        for (var i = 1; i < array.length; i += 1) {
-            if (array[i-1] > array[i]) {
-                throw new Error('array not sorted (for i: ' + i + ')');
-            }
-        }
-
-        console.log('OK!');
-    };
-
-    exports.testMergeLo = function() {
-        var left = getRandomSortedArray(13720);
-        var right = getRandomSortedArray(15837);
-
-        var array = left.concat(right);
-
-        console.log('merge start');
-
-        mergeLow(array, { startIndex:0, count:left.length }, { startIndex: left.length, count: right.length }, []);
-
-        console.log('assert start');
-        assertSorted(array);
     };
 
     // merge left with mergeArea and put to right from top to bottom
@@ -500,24 +475,6 @@
         };
     };
 
-    exports.testMergeHi = function() {
-        var left = getRandomSortedArray(23720);
-        var right = getRandomSortedArray(15837);
-
-        var array = left.concat(right);
-
-        console.log('merge start');
-
-        mergeHigh(array, { startIndex:0, count:left.length }, { startIndex: left.length, count: right.length }, []);
-
-        console.log('assert start');
-        assertSorted(array);
-    };
-
-    exports.mergeHi = function(left, right) {
-        return mergeHigh(left.concat(right), { startIndex:0, count:left.length }, { startIndex:left.length, count:right.length }, []).__array__;
-    };
-
     // elements in left run are <= than element in right run
     var mergeRuns = exports.mergeRuns = function(array, left, right, mergeArea) {
         if (left.count < right.count) {
@@ -581,7 +538,6 @@
         var arrayLength = array.length;
         
         var DESIRED_MINRUN_SIZE = mergeComputeMinrun(arrayLength);
-        console.log('DESIRED_MINRUN_SIZE = ', DESIRED_MINRUN_SIZE);
         
         var runsStack = [];
         var mergeArea = [];
@@ -619,32 +575,6 @@
         }
 
         return array;
-    };
-
-    exports.testTimsort = function() {
-        var a = [], N = 5500000;
-
-        console.log('generating data...');
-        for (var i = 0; i < N; i += 1) {
-            a.push(Math.random());
-        }
-
-        console.log('timsort');
-        var tmp = [].concat(a);
-        
-        console.time('timsort');
-        exports.timsort(tmp);
-        console.timeEnd('timsort');
-        
-        console.log('check sorted...');
-        assertSorted(tmp);
-
-        console.log('js sort');
-        tmp = [].concat(a);
-       
-        console.time('jsSort');
-        tmp.sort(NUMERIC_COMPARE);
-        console.timeEnd('jsSort');
     };
 
 }(window.timsort = {}));

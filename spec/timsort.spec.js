@@ -525,5 +525,179 @@ describe('timsort', function() {
         });
    });
 
+    describe('mergeLow', function() {
+        it('merges two neighbour runs', function() {
+            var array = [0,0, 1,20,30, 15,24,26,37, 0,0];
+            var mergeArea = [];
 
- });
+            timsort.mergeLow(
+                array,
+                { startIndex:2, count:3 },
+                { startIndex:5, count:4 },
+                mergeArea);
+
+            expect(array).toEqual([0,0, 1,15,20,24,26,30,37, 0,0]);
+        });
+
+        it('can merge long run with short run', function() {
+            var array = [0, 1,2,3,4,5,6,7, -1,11, 0];
+            var mergeArea = [];
+
+            timsort.mergeLow(
+                array,
+                { startIndex:1, count:7 },
+                { startIndex:8, count:2 },
+                mergeArea);
+
+            expect(array).toEqual([0, -1,1,2,3,4,5,6,7,11, 0]);
+        });
+
+        it('can merge short run with long run', function() {
+            var array = [0, -11, 0,10,20,30,40,50, 0];
+            var mergeArea = [];
+
+            timsort.mergeLow(
+                array,
+                { startIndex:1, count:1 },
+                { startIndex:2, count:6 },
+                mergeArea);
+
+            expect(array).toEqual([0, -11,0,10,20,30,40,50, 0]);
+        });
+
+        it('passes stress test', function() {
+            var first = testUtils.getRandomSortedArrayWithRepetitions(1000);
+            var second = testUtils.getRandomSortedArrayWithRepetitions(1234);
+
+            var array = first.concat(second);
+            var mergeArea = [];
+
+            timsort.mergeLow(
+                array,
+                { startIndex:0, count:first.length },
+                { startIndex:first.length, count:second.length },
+                mergeArea);
+
+            testUtils.assertArrayIsSorted(array);
+        });
+    });
+    
+    describe('mergeHigh', function() {
+        it('merges two neighbour runs', function() {
+            var array = [0,0, 1,20,30, 15,24,26,37, 0,0];
+            var mergeArea = [];
+
+            timsort.mergeHigh(
+                array,
+                { startIndex:2, count:3 },
+                { startIndex:5, count:4 },
+                mergeArea);
+
+            expect(array).toEqual([0,0, 1,15,20,24,26,30,37, 0,0]);
+        });
+
+        it('can merge long run with short run', function() {
+            var array = [0, 1,2,3,4,5,6,7, -1,11, 0];
+            var mergeArea = [];
+
+            timsort.mergeHigh(
+                array,
+                { startIndex:1, count:7 },
+                { startIndex:8, count:2 },
+                mergeArea);
+
+            expect(array).toEqual([0, -1,1,2,3,4,5,6,7,11, 0]);
+        });
+
+        it('can merge short run with long run', function() {
+            var array = [0, -11, 0,10,20,30,40,50, 0];
+            var mergeArea = [];
+
+            timsort.mergeHigh(
+                array,
+                { startIndex:1, count:1 },
+                { startIndex:2, count:6 },
+                mergeArea);
+
+            expect(array).toEqual([0, -11,0,10,20,30,40,50, 0]);
+        });
+
+        it('passes stress test', function() {
+            var first = testUtils.getRandomSortedArrayWithRepetitions(1000);
+            var second = testUtils.getRandomSortedArrayWithRepetitions(1234);
+
+            var array = first.concat(second);
+            var mergeArea = [];
+
+            timsort.mergeHigh(
+                array,
+                { startIndex:0, count:first.length },
+                { startIndex:first.length, count:second.length },
+                mergeArea);
+
+            testUtils.assertArrayIsSorted(array);
+        });
+    });
+
+    describe('TIMSORT', function() {
+        var tsort = timsort.timsort;
+
+        it('can sort empty array', function() {
+            var a = [];
+
+            tsort(a);
+
+            expect(a).toEqual([]);
+        });
+
+        it('can sort single element array', function() {
+            var a = [666];
+
+            tsort(a);
+
+            expect(a).toEqual([666]);
+        });
+
+        it('can sort two element array', function() {
+            expect(tsort([1,2])).toEqual([1,2]);
+            expect(tsort([2,1])).toEqual([1,2]);
+            expect(tsort([1,1])).toEqual([1,1]);
+        });
+
+        it('can sort already sorted array', function() {
+            var array = testUtils.getRandomSortedArray(100);
+
+            expect(tsort([].concat(array)))
+                .toEqual(array);
+        });
+
+        it('can sort array sorted in reverse order', function() {
+            var array = testUtils.getRandomSortedArray(100);
+            
+            var inversed = [].concat(array);
+            timsort.reverse(inversed, 0, inversed.length);
+
+            expect(tsort(inversed)).toEqual(array);
+        });
+
+        it('can sort arrays of various sizes', function() {
+            for (var i = 100; i < 1234; i += 1) {
+                var array = testUtils.getRandomArray(i);
+
+                var sortedArray = [].concat(array);
+                sortedArray.sort(testUtils.NUMERIC_COMPARE);
+
+                expect(tsort(array)).toEqual(sortedArray);
+            }
+        });
+
+        it('can sort big arrays', function() {
+            var bigArray = testUtils.getRandomArray(1000000);
+
+            var sortedBigArray = [].concat(bigArray);
+            sortedBigArray.sort(testUtils.NUMERIC_COMPARE);
+
+            expect(tsort(bigArray)).toEqual(sortedBigArray);
+        });
+    });
+});

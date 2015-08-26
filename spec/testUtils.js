@@ -5,14 +5,21 @@
         return (a - b);
     };
 
-    var getRandomSortedArray = exports.getRandomSortedArray = function(size) {
+    var getRandomArray = exports.getRandomArray = function(size) {
         var randomArray = [];
 
         for (var i = 0; i < size; i += 1) {
             randomArray.push(Math.random());
         }
 
+        return randomArray;
+    };
+
+    var getRandomSortedArray = exports.getRandomSortedArray = function(size) {
+        var randomArray = getRandomArray(size);
+
         randomArray.sort(NUMERIC_COMPARE);
+
         return randomArray;
     };
 
